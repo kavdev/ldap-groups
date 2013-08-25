@@ -1,7 +1,7 @@
 ldap-groups
 %%%%%%%%%%%
 
-A django Active Directory group management abstraction that uses python-ldap as a backend for cross-platform compatability.
+A django Active Directory group management abstraction that uses python-ldap as a backend for cross-platform compatibility.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Version:           1.0.0
