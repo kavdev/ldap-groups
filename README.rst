@@ -34,18 +34,18 @@ There are a few settings that must be configured before ldap-groups will run.
 
 *Mandatory*
 
-``LDAP_GROUPS_SERVER_URI`` - The ldap server's uri, e.g. 'ldap://example.com'
-``LDAP_GROUPS_BASE_DN`` - The base search dn, e.g. 'DC=example,DC=com'
+* ``LDAP_GROUPS_SERVER_URI`` - The ldap server's uri, e.g. 'ldap://example.com'
+* ``LDAP_GROUPS_BASE_DN`` - The base search dn, e.g. 'DC=example,DC=com'
 
 *Optional*
 
-``LDAP_GROUPS_BIND_DN`` - The bind user's DN
-``LDAP_GROUPS_BIND_PASSWORD`` - The bind user's password
+* ``LDAP_GROUPS_BIND_DN`` - The bind user's DN
+* ``LDAP_GROUPS_BIND_PASSWORD`` - The bind user's password
 
 NOTE: while a bind user is optional, many servers' security settings will deny anonymous access.
 
-``LDAP_GROUPS_USER_LOOKUP_ATTRIBUTE`` - The attribute by which to search when looking up users (should be unique). Defaults to ``'sAMAccountName'``.
-``LDAP_GROUPS_ATTRIBUTE_LIST`` - A list of attributes returned for each member while pulling group members. An empty list should return all attributes. Defaults to ``['displayName', 'sAMAccountName', 'distinguishedName']``.
+* ``LDAP_GROUPS_USER_LOOKUP_ATTRIBUTE`` - The attribute by which to search when looking up users (should be unique). Defaults to ``'sAMAccountName'``.
+* ``LDAP_GROUPS_ATTRIBUTE_LIST`` - A list of attributes returned for each member while pulling group members. An empty list should return all attributes. Defaults to ``['displayName', 'sAMAccountName', 'distinguishedName']``.
 
 
 Usage
