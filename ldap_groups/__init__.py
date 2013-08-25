@@ -1,8 +1,10 @@
 """
 
-LDAP Groups v1 - A tool to manage Active Directory group membership.
+LDAP Groups v1 - A django Active Directory group management abstraction
+    that uses python-ldap as a backend for cross-platform compatability.
 
 Dependencies:
+    Django>=1.5.2,
     python-ldap==2.4.13
 
 ldap-groups is free software: you can redistribute it and/or modify
