@@ -5,7 +5,7 @@ A django Active Directory group management abstraction that uses python-ldap as 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Version:           1.0.0
-:Dependencies:      Python 2.7, Django 1.5.2+
+:Dependencies:      Python 2.7, Django 1.5.2+, python-ldap 2.4.13
 :Home page:         https://bitbucket.org/alex_kavanaugh/ldap-groups
 :Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
 :License:           GNU LGPL (http://www.gnu.org/licenses/lgpl.html)
