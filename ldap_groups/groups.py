@@ -86,7 +86,7 @@ class ADGroup:
                 return self.ldap_connection.search_s(self.USER_SEARCH['base_dn'], self.USER_SEARCH['scope'], self.USER_SEARCH['filter_string'] % account_name, self.USER_SEARCH['attribute_list'])[0][-1]['distinguishedName'][0]
             except ldap.OPERATIONS_ERROR, error_message:
                 raise ImproperlyConfigured("The LDAP server does not accept anonymous connections: \n\t%s" % error_message[0]['info'])
-        except IndexError:
+        except (TypeError, IndexError):
             raise ObjectDoesNotExist("The alias provided does not exist in the Active Directory.")
 
     def _get_group_members(self):

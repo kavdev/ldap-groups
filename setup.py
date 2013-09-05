@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='ldap-groups',
-    version='1.0.0',
+    version='1.0.1',
     author='Alex Kavanaugh',
     author_email='kavanaugh.development@outlook.com',
     packages=['ldap_groups'],
