@@ -4,7 +4,6 @@ LDAP Groups v1 - A django Active Directory group management abstraction
     that uses python-ldap as a backend for cross-platform compatability.
 
 Dependencies:
-    Django>=1.5.2,
     python-ldap==2.4.13
 
 ldap-groups is free software: you can redistribute it and/or modify
@@ -30,5 +29,5 @@ from groups import ADGroup
 # Version Classification
 # Major Updates, Minor Updates, Revision/Bugfix Updates
 #
-VERSION = ("1", "0", "0")
+VERSION = ("2", "5", "0")
 __version__ = ".".join(VERSION)
