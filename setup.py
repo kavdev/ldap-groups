@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='ldap-groups',
-    version='2.5.0',
+    version='2.5.1',
     author='Alex Kavanaugh',
     author_email='kavanaugh.development@outlook.com',
     packages=['ldap_groups'],
@@ -11,6 +11,6 @@ setup(
     description="A python/django Active Directory group management abstraction that uses python-ldap as a backend for cross-platform compatibility.",
     long_description=open('README.rst').read(),
     install_requires=[
-        "python-ldap==2.4.13",
+        "python-ldap>=2.4.13",
     ],
 )
