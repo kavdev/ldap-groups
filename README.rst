@@ -97,13 +97,13 @@ Once the ADGroup is instantiated, the rest is fairly simple:
             self.ad_group_instance = ADGroup(GROUP_DN)
         
         def get_attributes(self):            
-            self.ad_group_instance.get_attributes()
+            return self.ad_group_instance.get_attributes()
         
         def get_name(self):            
-            self.ad_group_instance.get_attribute(NAME_ATTRIBUTE)
+            return self.ad_group_instance.get_attribute(NAME_ATTRIBUTE)
         
         def get_type(self):
-            self.ad_group_instance.get_attribute(TYPE_ATTRIBUTE)
+            return self.ad_group_instance.get_attribute(TYPE_ATTRIBUTE)
 
 Documentation
 ==================================

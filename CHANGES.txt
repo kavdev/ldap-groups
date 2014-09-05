@@ -1,5 +1,6 @@
-v1.0.0, 8/26/13 -- Initial release.
+v1.0.0, /8/26/13 -- Initial release.
 v1.0.1, 9/5/13 -- Bugfix - Nonexistent user can also throw a TypeError.
 v2.0.0, 8/30/14 -- Removed django dependency
 v2.5.0, 8/30/14 -- Added group attribute and tree traversal methods
 v2.5.1, 8/31/14 -- Fixed python-ldap dependency restriction (now >=)
+v2.5.2, 9/4/14 -- Fixed Issue #2, fixed readme examples

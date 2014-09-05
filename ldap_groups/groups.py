@@ -21,6 +21,7 @@
 
 import ldap
 import logging
+from string import whitespace
 
 from .exceptions import (AccountDoesNotExist, InvalidGroupDN, ImproperlyConfigured, InvalidCredentials,
                          LDAPServerUnreachable, ModificationFailed, AccountAlreadyExists, InsufficientPermissions)
@@ -335,7 +336,7 @@ class ADGroup:
         """ Returns this group's parent (up to the DC)"""
 
         # Don't go above the DC
-        if self.group_dn.split("DC")[0] == '':
+        if self.group_dn.split("DC")[0].translate(None, whitespace) == '':
             return self
         else:
             parent_dn = self.group_dn.split(",", 1).pop()
@@ -356,7 +357,7 @@ class ADGroup:
             ancestor_dn = self.group_dn
 
             for x in xrange(generation):
-                if ancestor_dn.split("DC")[0] == '':
+                if ancestor_dn.split("DC")[0].translate(None, whitespace) == '':
                     break
                 else:
                     ancestor_dn = ancestor_dn.split(",", 1).pop()
