@@ -123,16 +123,16 @@ class ADGroup:
         }
 
         self.GROUP_CHILDREN_SEARCH = {
-            'base_dn': self.group_dn,
-            'scope': ldap.SCOPE_ONELEVEL,
-            'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
+            'base_dn': self.base_dn,
+            'scope': ldap.SCOPE_SUBTREE,
+            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(memberOf=%s))" % self.group_dn,
             'attribute_list': []
         }
 
         self.GROUP_SINGLE_CHILD_SEARCH = {
-            'base_dn': self.group_dn,
-            'scope': ldap.SCOPE_ONELEVEL,
-            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(name=%s))",
+            'base_dn': self.base_dn,
+            'scope': ldap.SCOPE_SUBTREE,
+            'filter_string': "(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name=%s))(memberOf=" + self.group_dn + "))",
             'attribute_list': []
         }
 
@@ -272,6 +272,9 @@ class ADGroup:
             if member[0]:
                 info_dict = {}
 
+                if not self.GROUP_MEMBER_SEARCH['attribute_list']:
+                    info_dict = member[-1]
+
                 for attribute in self.GROUP_MEMBER_SEARCH['attribute_list']:
                     info_dict.update({attribute: member[-1][attribute][0]})
 
@@ -363,6 +366,12 @@ class ADGroup:
                     ancestor_dn = ancestor_dn.split(",", 1).pop()
 
             return ADGroup(ancestor_dn, self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password)
+
+    def search(self, filter_string, base_dn=None, scope=ldap.SCOPE_SUBTREE, attr_list=None):
+        base_dn = self.base_dn if not base_dn else base_dn
+        attr_list = self.attr_list if not attr_list else attr_list
+
+        return self.ldap_connection.search_s(base_dn, scope, filter_string, attr_list)
 
     def __repr__(self):
         return "<ADGroup: " + str(self.group_dn.split(",", 1)[0]) + ">"
