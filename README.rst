@@ -4,7 +4,7 @@ ldap-groups
 A python/django Active Directory group management abstraction that uses python-ldap as a backend for cross-platform compatibility.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:Version:           2.5.1
+:Version:           2.5.3
 :Dependencies:      Python 2.7, python-ldap>=2.4.13
 :Home page:         https://bitbucket.org/kavanaugh_development/ldap-groups
 :Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
