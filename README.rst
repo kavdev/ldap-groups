@@ -5,7 +5,7 @@ A python/django Active Directory group management abstraction that uses python3-
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Version:           3.0.0-dev
-:Dependencies:      Python 2.6+, 3.0+, python3-ldap>=0.9.5.4
+:Dependencies:      Python 2.7+, 3.0+, python3-ldap>=0.9.5.4
 :Home page:         https://bitbucket.org/kavanaugh_development/ldap-groups
 :Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
 :License:           GNU LGPL (http://www.gnu.org/licenses/lgpl.html)
