@@ -19,9 +19,12 @@
 
 """
 
-import ldap
 import logging
 from string import whitespace
+
+from ldap3 import Server, Connection, SEARCH_SCOPE_BASE_OBJECT, SEARCH_SCOPE_WHOLE_SUBTREE, MODIFY_DELETE, MODIFY_ADD, ALL_ATTRIBUTES, NO_ATTRIBUTES
+from ldap3.core.exceptions import (LDAPException, LDAPInvalidServerError, LDAPInvalidCredentialsResult, LDAPOperationsErrorResult, LDAPInvalidDNSyntaxResult,
+                                   LDAPNoSuchObjectResult, LDAPSizeLimitExceededResult, LDAPEntryAlreadyExistsResult, LDAPInsufficientAccessRightsResult, )
 
 from .exceptions import (AccountDoesNotExist, InvalidGroupDN, ImproperlyConfigured, InvalidCredentials,
                          LDAPServerUnreachable, ModificationFailed, AccountAlreadyExists, InsufficientPermissions)
@@ -103,72 +106,73 @@ class ADGroup:
         # Initialize search objects
         self.ATTRIBUTES_SEARCH = {
             'base_dn': self.group_dn,
-            'scope': ldap.SCOPE_BASE,
+            'scope': SEARCH_SCOPE_BASE_OBJECT,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
-            'attribute_list': []
+            'attribute_list': ALL_ATTRIBUTES
         }
 
         self.USER_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': ldap.SCOPE_SUBTREE,
-            'filter_string': "(&(objectClass=user)(" + self.user_lookup_attr + "=%s))",
-            'attribute_list': []
+            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'filter_string': "(&(objectClass=user)({lookup_attribute}={{lookup_value}}))".format(lookup_attribute=self.user_lookup_attr),
+            'attribute_list': NO_ATTRIBUTES
         }
 
         self.GROUP_MEMBER_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': ldap.SCOPE_SUBTREE,
-            'filter_string': "(&(objectCategory=user)(memberOf=%s))",
+            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'filter_string': "(&(objectCategory=user)(memberOf={group_dn}))",
             'attribute_list': self.attr_list
         }
 
         self.GROUP_CHILDREN_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': ldap.SCOPE_SUBTREE,
-            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(memberOf=%s))" % self.group_dn,
-            'attribute_list': []
+            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(memberOf={group_dn}))".format(group_dn=self.group_dn),
+            'attribute_list': NO_ATTRIBUTES
         }
 
         self.GROUP_SINGLE_CHILD_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': ldap.SCOPE_SUBTREE,
-            'filter_string': "(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name=%s))(memberOf=" + self.group_dn + "))",
-            'attribute_list': []
+            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'filter_string': "(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name={{child_group_name}}))(memberOf={parent_dn}))".format(parent_dn=self.group_dn),
+            'attribute_list': NO_ATTRIBUTES
         }
 
         self.VALID_GROUP_TEST = {
             'base_dn': self.group_dn,
-            'scope': ldap.SCOPE_BASE,
+            'scope': SEARCH_SCOPE_BASE_OBJECT,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
-            'attribute_list': []
+            'attribute_list': NO_ATTRIBUTES
         }
 
-        ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, 0)
-        self.ldap_connection = ldap.initialize(self.server_uri)
+        # ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, 0)
+
+        ldap_server = Server(self.server_uri)
 
         if self.bind_dn and self.bind_password:
             try:
-                self.ldap_connection.simple_bind_s(self.bind_dn, self.bind_password)
-            except ldap.SERVER_DOWN:
+                self.ldap_connection = Connection(ldap_server, auto_bind=True, user=self.bind_dn, password=self.bind_password)
+            except LDAPInvalidServerError:
                 raise LDAPServerUnreachable("The LDAP server is down or the SERVER_URI is invalid.")
-            except ldap.INVALID_CREDENTIALS:
+            except LDAPInvalidCredentialsResult:
                 raise InvalidCredentials("The SERVER_URI, BIND_DN, or BIND_PASSWORD provided is not valid.")
         else:
             logger.warning("LDAP Bind Credentials are not set. Group modification methods will most likely fail.")
-            self.ldap_connection.simple_bind_s()
+            self.ldap_connection = Connection(ldap_server, auto_bind=True)
 
         # Make sure the group is valid
         valid, reason = self._get_valididty()
 
         if not valid:
-            raise InvalidGroupDN("The AD Group distinguished name provided is invalid:\n\t%s" % reason)
+            raise InvalidGroupDN("The AD Group distinguished name provided is invalid:\n\t{reason}".format(reason=reason))
 
     def __del__(self):
         """Closes the LDAP connection."""
 
-        self.ldap_connection.unbind_s()
+        self.ldap_connection.unbind()
 
-    def _get_valididty(self):
+    def _get_valididty(self, group_dn):
         """ Determines whether this AD Group is valid.
 
         :returns: True and "" if this group is valid or False and a string description with the reason why it isn't valid otherwise.
@@ -176,15 +180,18 @@ class ADGroup:
         """
 
         try:
-            self.ldap_connection.search_s(self.VALID_GROUP_TEST['base_dn'], self.VALID_GROUP_TEST['scope'], self.VALID_GROUP_TEST['filter_string'], self.VALID_GROUP_TEST['attribute_list'])
-        except ldap.OPERATIONS_ERROR, error_message:
-            raise ImproperlyConfigured("The LDAP server most-likely does not accept anonymous connections: \n\t%s" % error_message[0]['info'])
-        except (ldap.INVALID_DN_SYNTAX):
-            return False, "Invalid DN Syntax: %s" % self.group_dn
-        except (ldap.NO_SUCH_OBJECT):
-            return False, "No such group: %s" % self.group_dn
-        except (ldap.SIZELIMIT_EXCEEDED):
-            return False, "This group has too many children for ldap-groups to handle: %s" % self.group_dn
+            self.ldap_connection.search(search_base=self.VALID_GROUP_TEST['base_dn'],
+                                        search_filter=self.VALID_GROUP_TEST['filter_string'],
+                                        search_scope=self.VALID_GROUP_TEST['scope'],
+                                        attributes=self.VALID_GROUP_TEST['attribute_list'])
+        except LDAPOperationsErrorResult as error_message:
+            raise ImproperlyConfigured("The LDAP server most-likely does not accept anonymous connections: \n\t{error}".format(error=error_message[0]['info']))
+        except LDAPInvalidDNSyntaxResult:
+            return False, "Invalid DN Syntax: {group_dn}".format(group_dn=self.group_dn)
+        except LDAPNoSuchObjectResult:
+            return False, "No such group: {group_dn}".format(group_dn=self.group_dn)
+        except LDAPSizeLimitExceededResult:
+            return False, "This group has too many children for ldap-groups to handle: {group_dn}".format(group_dn=self.group_dn)
 
         return True, ""
 
@@ -198,34 +205,47 @@ class ADGroup:
 
         """
 
-        try:
-            return self.ldap_connection.search_s(self.USER_SEARCH['base_dn'], self.USER_SEARCH['scope'], self.USER_SEARCH['filter_string'] % account_name, self.USER_SEARCH['attribute_list'])[0][0]
-        except (TypeError, IndexError):
+        self.ldap_connection.search(search_base=self.USER_SEARCH['base_dn'],
+                                    search_filter=self.USER_SEARCH['filter_string'].format(attribute_value=account_name),
+                                    search_scope=self.USER_SEARCH['scope'],
+                                    attributes=self.USER_SEARCH['attribute_list'])
+        results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
+
+        if not results:
             raise AccountDoesNotExist("The account name provided does not exist in the Active Directory.")
+
+        if len(results) > 1:
+            logger.debug("Search returned more than one result: {results}".format(results=results))
+
+        return results[0]
 
     def _get_group_members(self):
         """ Searches for a group and retrieve its members."""
 
-        return self.ldap_connection.search_s(self.GROUP_MEMBER_SEARCH['base_dn'], self.GROUP_MEMBER_SEARCH['scope'], self.GROUP_MEMBER_SEARCH['filter_string'] % self.group_dn, self.GROUP_MEMBER_SEARCH['attribute_list'])
+        self.ldap_connection.search(search_base=self.GROUP_MEMBER_SEARCH['base_dn'],
+                                    search_filter=self.GROUP_MEMBER_SEARCH['filter_string'].format(group_dn=self.group_dn),
+                                    search_scope=self.GROUP_MEMBER_SEARCH['scope'],
+                                    attributes=self.GROUP_MEMBER_SEARCH['attribute_list'])
+        return [{"dn": result["dn"], "attributes": result["attributes"]} for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
 
     def _attempt_modification(self, account_name, modification):
 
         mod_type = modification[0][0]
-        action_word = "adding" if mod_type == ldap.MOD_ADD else "removing"
-        action_prep = "to" if mod_type == ldap.MOD_ADD else "from"
+        action_word = "adding" if mod_type == MODIFY_ADD else "removing"
+        action_prep = "to" if mod_type == MODIFY_ADD else "from"
 
-        message_base = "Error %(action)s user '%(user)s' %(prep)s group '%(group)s': " % {'action': action_word,
-                                                                                          'user': account_name,
-                                                                                          'prep': action_prep,
-                                                                                          'group': self.group_dn}
+        message_base = "Error {action} user '{user}' {prep} group '{group_dn}': ".format(action=action_word,
+                                                                                      user=account_name,
+                                                                                      prep=action_prep,
+                                                                                      group_dn=self.group_dn)
 
         try:
-            self.ldap_connection.modify_s(self.group_dn, modification)
-        except ldap.ALREADY_EXISTS:
+            self.ldap_connection.modify(dn=self.group_dn, changes=modification)
+        except LDAPEntryAlreadyExistsResult:
             raise AccountAlreadyExists(message_base + "The user already exists.")
-        except ldap.INSUFFICIENT_ACCESS:
+        except LDAPInsufficientAccessRightsResult:
             raise InsufficientPermissions(message_base + "The bind user does not have permission to modify this group.")
-        except ldap.LDAPError, error_message:
+        except LDAPException as error_message:
             raise ModificationFailed(message_base + str(error_message))
 
     def add_member(self, account_name):
@@ -241,7 +261,7 @@ class ADGroup:
 
         """
 
-        add_member = [(ldap.MOD_ADD, 'member', self._get_user_dn(account_name))]
+        add_member = [(MODIFY_ADD, 'member', self._get_user_dn(account_name))]
         self._attempt_modification(account_name, add_member)
 
     def remove_member(self, account_name):
@@ -256,7 +276,7 @@ class ADGroup:
 
         """
 
-        remove_member = [(ldap.MOD_DELETE, 'member', self._get_user_dn(account_name))]
+        remove_member = [(MODIFY_DELETE, 'member', self._get_user_dn(account_name))]
         self._attempt_modification(account_name, remove_member)
 
     def get_member_info(self):
@@ -269,16 +289,18 @@ class ADGroup:
         member_info = []
 
         for member in self._get_group_members():
-            if member[0]:
-                info_dict = {}
+            info_dict = {}
 
-                if not self.GROUP_MEMBER_SEARCH['attribute_list']:
-                    info_dict = member[-1]
+            for attribute in self.GROUP_MEMBER_SEARCH['attribute_list']:
+                raw_attribute = member["attributes"][attribute]
 
-                for attribute in self.GROUP_MEMBER_SEARCH['attribute_list']:
-                    info_dict.update({attribute: member[-1][attribute][0]})
+                # Pop one-item lists
+                if len(raw_attribute) == 1:
+                    raw_attribute = raw_attribute.pop()
 
-                member_info.append(info_dict)
+                info_dict.update({attribute: member["attributes"][attribute]})
+
+            member_info.append(info_dict)
 
         return member_info
 
@@ -292,34 +314,59 @@ class ADGroup:
 
         """
 
-        result = self.ldap_connection.search_s(self.ATTRIBUTES_SEARCH['base_dn'], self.ATTRIBUTES_SEARCH['scope'], self.ATTRIBUTES_SEARCH['filter_string'], [attribute_name])[0]
+        self.ldap_connection.search(search_base=self.ATTRIBUTES_SEARCH['base_dn'],
+                                    search_filter=self.ATTRIBUTES_SEARCH['filter_string'],
+                                    search_scope=self.ATTRIBUTES_SEARCH['scope'],
+                                    attributes=[attribute_name])
 
-        try:
-            return result[1][attribute_name].pop()
-        except (KeyError, IndexError):
-            logger.debug("ADGroup %s does not have the attribute '%s'." % (self.group_dn, attribute_name))
+        results = [result["attributes"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
+
+        if len(results) != 1:
+            logger.debug("Search returned {count} results: {results}".format(count=len(results), results=results))
+
+        attributes = results[0]
+
+        if attribute_name not in attributes:
+            logger.debug("ADGroup {group_dn} does not have the attribute '{attribute}'.".format(group_dn=self.group_dn, attribute=attribute_name))
             return None
+        else:
+            raw_attribute = attributes[attribute_name]
+
+            # Pop one-item lists
+            if len(raw_attribute) == 1:
+                raw_attribute = raw_attribute.pop()
+
+            return raw_attribute
 
     def get_attributes(self):
         """ Returns a dictionary of this group's attributes."""
 
-        result = self.ldap_connection.search_s(self.ATTRIBUTES_SEARCH['base_dn'], self.ATTRIBUTES_SEARCH['scope'], self.ATTRIBUTES_SEARCH['filter_string'])
+        self.ldap_connection.search(search_base=self.ATTRIBUTES_SEARCH['base_dn'],
+                                    search_filter=self.ATTRIBUTES_SEARCH['filter_string'],
+                                    search_scope=self.ATTRIBUTES_SEARCH['scope'],
+                                    attributes=self.ATTRIBUTES_SEARCH['attributes'])
 
-        if not result:
-            return result
-        else:
-            return result[0][1]
+        results = [result["attributes"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
+
+        if len(results) != 1:
+            logger.debug("Search returned {count} results: {results}".format(count=len(results), results=results))
+
+        return results[0]
 
     def get_children(self):
         """ Returns a list of this group's children."""
 
         children = []
 
-        results = self.ldap_connection.search_s(self.GROUP_CHILDREN_SEARCH['base_dn'], self.GROUP_CHILDREN_SEARCH['scope'], self.GROUP_CHILDREN_SEARCH['filter_string'], self.GROUP_CHILDREN_SEARCH['attribute_list'])
+        self.ldap_connection.search(search_base=self.GROUP_CHILDREN_SEARCH['base_dn'],
+                                    search_filter=self.GROUP_CHILDREN_SEARCH['filter_string'],
+                                    search_scope=self.GROUP_CHILDREN_SEARCH['scope'],
+                                    attributes=self.GROUP_CHILDREN_SEARCH['attribute_list'])
+
+        results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
 
         for result in results:
-            if result[0]:
-                children.append(ADGroup(result[0], self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password))
+            children.append(ADGroup(result, self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password))
 
         return children
 
@@ -331,9 +378,17 @@ class ADGroup:
 
         """
 
-        result = self.ldap_connection.search_s(self.GROUP_SINGLE_CHILD_SEARCH['base_dn'], self.GROUP_SINGLE_CHILD_SEARCH['scope'], self.GROUP_SINGLE_CHILD_SEARCH['filter_string'] % group_name, self.GROUP_SINGLE_CHILD_SEARCH['attribute_list'])[0]
+        self.ldap_connection.search(search_base=self.GROUP_SINGLE_CHILD_SEARCH['base_dn'],
+                                    search_filter=self.GROUP_SINGLE_CHILD_SEARCH['filter_string'].format(child_group_name=group_name),
+                                    search_scope=self.GROUP_SINGLE_CHILD_SEARCH['scope'],
+                                    attributes=self.GROUP_SINGLE_CHILD_SEARCH['attribute_list'])
 
-        return ADGroup(result[0], self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password)
+        results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
+
+        if len(results) != 1:
+            logger.debug("Search returned {count} results: {results}".format(count=len(results), results=results))
+
+        return ADGroup(results[0], self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password)
 
     def parent(self):
         """ Returns this group's parent (up to the DC)"""
@@ -359,7 +414,7 @@ class ADGroup:
         else:
             ancestor_dn = self.group_dn
 
-            for x in xrange(generation):
+            for x in range(generation):
                 if ancestor_dn.split("DC")[0].translate(None, whitespace) == '':
                     break
                 else:
@@ -367,11 +422,12 @@ class ADGroup:
 
             return ADGroup(ancestor_dn, self.server_uri, self.base_dn, self.user_lookup_attr, self.attr_list, self.bind_dn, self.bind_password)
 
-    def search(self, filter_string, base_dn=None, scope=ldap.SCOPE_SUBTREE, attr_list=None):
+    def search(self, filter_string, base_dn=None, scope=None, attr_list=None):
         base_dn = self.base_dn if not base_dn else base_dn
-        attr_list = self.attr_list if not attr_list else attr_list
+        scope = self.scope if not scope else SEARCH_SCOPE_WHOLE_SUBTREE
+        attr_list = self.attr_list if not attr_list else ALL_ATTRIBUTES
 
-        return self.ldap_connection.search_s(base_dn, scope, filter_string, attr_list)
+        return self.ldap_connection.search(search_base=base_dn, search_filter=filter_string, search_scope=scope, attributes=attr_list)
 
     def __repr__(self):
         return "<ADGroup: " + str(self.group_dn.split(",", 1)[0]) + ">"
