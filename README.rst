@@ -1,11 +1,11 @@
 ldap-groups
 %%%%%%%%%%%
 
-A python/django Active Directory group management abstraction that uses python-ldap as a backend for cross-platform compatibility.
+A python/django Active Directory group management abstraction that uses python3-ldap as a backend for cross-platform compatibility.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:Version:           2.5.3
-:Dependencies:      Python 2.7, python-ldap>=2.4.13
+:Version:           3.0.0-dev
+:Dependencies:      Python 2.6+, 3.0+, python3-ldap>=0.9.5.4
 :Home page:         https://bitbucket.org/kavanaugh_development/ldap-groups
 :Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
 :License:           GNU LGPL (http://www.gnu.org/licenses/lgpl.html)
@@ -70,38 +70,38 @@ Once the ADGroup is instantiated, the rest is fairly simple:
 .. code:: python
 
     from ldap_groups import ADGroup
-    
+
     GROUP_DN = "ou=users,dc=example,dc=com"
     ACCOUNT_NAME = "jdoe"
     NAME_ATTRIBUTE = "name"
     TYPE_ATTRIBUTE = "objectClass"
-    
+
     class ADGroupModifier(object):
-    
+
         def __init__(self):
             self.ad_group_instance = ADGroup(GROUP_DN)
-        
-        def add_member(self):            
+
+        def add_member(self):
             self.ad_group_instance.add_member(ACCOUNT_NAME)
-        
-        def remove_member(self):            
+
+        def remove_member(self):
             self.ad_group_instance.remove_member(ACCOUNT_NAME)
-        
+
         def get_group_member_info(self):
             return self.ad_group_instance.get_member_info()
 
 
     class ADGroupInfo(object):
-    
+
         def __init__(self):
             self.ad_group_instance = ADGroup(GROUP_DN)
-        
-        def get_attributes(self):            
+
+        def get_attributes(self):
             return self.ad_group_instance.get_attributes()
-        
-        def get_name(self):            
+
+        def get_name(self):
             return self.ad_group_instance.get_attribute(NAME_ATTRIBUTE)
-        
+
         def get_type(self):
             return self.ad_group_instance.get_attribute(TYPE_ATTRIBUTE)
 
