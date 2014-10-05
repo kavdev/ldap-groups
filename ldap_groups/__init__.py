@@ -1,10 +1,10 @@
 """
 
-LDAP Groups v2 - A python/django Active Directory group management abstraction
+LDAP Groups v3 - A python/django Active Directory group management abstraction
     that uses python-ldap as a backend for cross-platform compatability.
 
 Dependencies:
-    python-ldap>=2.4.13
+    python3-ldap>=0.9.5.4
 
 ldap-groups is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser Public License as published by
@@ -23,11 +23,11 @@ along with ldap-groups. If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from groups import ADGroup
+from .groups import ADGroup
 
 #
 # Version Classification
 # Major Updates, Minor Updates, Revision/Bugfix Updates
 #
-VERSION = ("2", "5", "3")
+VERSION = ("3", "0", "0")
 __version__ = ".".join(VERSION)
