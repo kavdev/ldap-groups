@@ -172,7 +172,7 @@ class ADGroup:
 
         self.ldap_connection.unbind()
 
-    def _get_valididty(self, group_dn):
+    def _get_valididty(self):
         """ Determines whether this AD Group is valid.
 
         :returns: True and "" if this group is valid or False and a string description with the reason why it isn't valid otherwise.
