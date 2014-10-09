@@ -206,7 +206,7 @@ class ADGroup:
         """
 
         self.ldap_connection.search(search_base=self.USER_SEARCH['base_dn'],
-                                    search_filter=self.USER_SEARCH['filter_string'].format(attribute_value=account_name),
+                                    search_filter=self.USER_SEARCH['filter_string'].format(lookup_value=account_name),
                                     search_scope=self.USER_SEARCH['scope'],
                                     attributes=self.USER_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
@@ -291,14 +291,14 @@ class ADGroup:
         for member in self._get_group_members():
             info_dict = {}
 
-            for attribute in self.GROUP_MEMBER_SEARCH['attribute_list']:
-                raw_attribute = member["attributes"][attribute]
+            for attribute_name in self.GROUP_MEMBER_SEARCH['attribute_list']:
+                raw_attribute = member["attributes"][attribute_name]
 
                 # Pop one-item lists
                 if len(raw_attribute) == 1:
                     raw_attribute = raw_attribute.pop()
 
-                info_dict.update({attribute: member["attributes"][attribute]})
+                info_dict.update({attribute_name: raw_attribute})
 
             member_info.append(info_dict)
 
