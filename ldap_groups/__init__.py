@@ -29,5 +29,5 @@ from .groups import ADGroup
 # Version Classification
 # Major Updates, Minor Updates, Revision/Bugfix Updates
 #
-VERSION = ("3", "0", "2")
+VERSION = ("3", "0", "3")
 __version__ = ".".join(VERSION)
