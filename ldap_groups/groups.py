@@ -23,7 +23,7 @@ import logging
 from string import whitespace
 
 from ldap3 import Server, Connection, SEARCH_SCOPE_BASE_OBJECT, SEARCH_SCOPE_WHOLE_SUBTREE, MODIFY_DELETE, MODIFY_ADD, ALL_ATTRIBUTES, NO_ATTRIBUTES
-from ldap3.core.exceptions import (LDAPException, LDAPInvalidServerError, LDAPInvalidCredentialsResult, LDAPOperationsErrorResult, LDAPInvalidDNSyntaxResult,
+from ldap3.core.exceptions import (LDAPException, LDAPExceptionError, LDAPInvalidServerError, LDAPInvalidCredentialsResult, LDAPOperationsErrorResult, LDAPInvalidDNSyntaxResult,
                                    LDAPNoSuchObjectResult, LDAPSizeLimitExceededResult, LDAPEntryAlreadyExistsResult, LDAPInsufficientAccessRightsResult, )
 
 from .exceptions import (AccountDoesNotExist, InvalidGroupDN, ImproperlyConfigured, InvalidCredentials,
@@ -152,14 +152,14 @@ class ADGroup:
 
         if self.bind_dn and self.bind_password:
             try:
-                self.ldap_connection = Connection(ldap_server, auto_bind=True, user=self.bind_dn, password=self.bind_password)
+                self.ldap_connection = Connection(ldap_server, auto_bind=True, user=self.bind_dn, password=self.bind_password, raise_exceptions=True)
             except LDAPInvalidServerError:
                 raise LDAPServerUnreachable("The LDAP server is down or the SERVER_URI is invalid.")
             except LDAPInvalidCredentialsResult:
                 raise InvalidCredentials("The SERVER_URI, BIND_DN, or BIND_PASSWORD provided is not valid.")
         else:
             logger.warning("LDAP Bind Credentials are not set. Group modification methods will most likely fail.")
-            self.ldap_connection = Connection(ldap_server, auto_bind=True)
+            self.ldap_connection = Connection(ldap_server, auto_bind=True, raise_exceptions=True)
 
         # Make sure the group is valid
         valid, reason = self._get_valididty()
@@ -204,9 +204,8 @@ class ADGroup:
         :raises: **AccountDoesNotExist** if the provided account name doesn't exist in the active directory.
 
         """
-
         self.ldap_connection.search(search_base=self.USER_SEARCH['base_dn'],
-                                    search_filter=self.USER_SEARCH['filter_string'].format(attribute_value=account_name),
+                                    search_filter=self.USER_SEARCH['filter_string'].format(lookup_value=account_name),
                                     search_scope=self.USER_SEARCH['scope'],
                                     attributes=self.USER_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
@@ -230,7 +229,7 @@ class ADGroup:
 
     def _attempt_modification(self, account_name, modification):
 
-        mod_type = modification[0][0]
+        mod_type = list(modification.values())[0][0]
         action_word = "adding" if mod_type == MODIFY_ADD else "removing"
         action_prep = "to" if mod_type == MODIFY_ADD else "from"
 
@@ -245,7 +244,7 @@ class ADGroup:
             raise AccountAlreadyExists(message_base + "The user already exists.")
         except LDAPInsufficientAccessRightsResult:
             raise InsufficientPermissions(message_base + "The bind user does not have permission to modify this group.")
-        except LDAPException as error_message:
+        except (LDAPException, LDAPExceptionError) as error_message:
             raise ModificationFailed(message_base + str(error_message))
 
     def add_member(self, account_name):
@@ -261,7 +260,7 @@ class ADGroup:
 
         """
 
-        add_member = [(MODIFY_ADD, 'member', self._get_user_dn(account_name))]
+        add_member = {'member': (MODIFY_ADD, [self._get_user_dn(account_name)])}
         self._attempt_modification(account_name, add_member)
 
     def remove_member(self, account_name):
@@ -276,7 +275,7 @@ class ADGroup:
 
         """
 
-        remove_member = [(MODIFY_DELETE, 'member', self._get_user_dn(account_name))]
+        remove_member = {'member': (MODIFY_DELETE, [self._get_user_dn(account_name)])}
         self._attempt_modification(account_name, remove_member)
 
     def get_member_info(self):
@@ -291,14 +290,14 @@ class ADGroup:
         for member in self._get_group_members():
             info_dict = {}
 
-            for attribute in self.GROUP_MEMBER_SEARCH['attribute_list']:
-                raw_attribute = member["attributes"][attribute]
+            for attribute_name in self.GROUP_MEMBER_SEARCH['attribute_list']:
+                raw_attribute = member["attributes"][attribute_name]
 
                 # Pop one-item lists
                 if len(raw_attribute) == 1:
                     raw_attribute = raw_attribute.pop()
 
-                info_dict.update({attribute: member["attributes"][attribute]})
+                info_dict.update({attribute_name: raw_attribute})
 
             member_info.append(info_dict)
 
@@ -430,4 +429,7 @@ class ADGroup:
         return self.ldap_connection.search(search_base=base_dn, search_filter=filter_string, search_scope=scope, attributes=attr_list)
 
     def __repr__(self):
-        return "<ADGroup: " + str(self.group_dn.split(",", 1)[0]) + ">"
+        try:
+            return "<ADGroup: " + str(self.group_dn.split(",", 1)[0]) + ">"
+        except AttributeError:
+            return "<ADGroup: " + str(self.group_dn) + ">"
