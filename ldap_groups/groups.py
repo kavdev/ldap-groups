@@ -216,7 +216,10 @@ class ADGroup:
         if len(results) > 1:
             logger.debug("Search returned more than one result: {results}".format(results=results))
 
-        return results[0]
+        if results:
+            return results[0]
+        else:
+            return results
 
     def _get_group_members(self):
         """ Searches for a group and retrieve its members."""
@@ -290,7 +293,7 @@ class ADGroup:
         for member in self._get_group_members():
             info_dict = {}
 
-            for attribute_name in self.GROUP_MEMBER_SEARCH['attribute_list']:
+            for attribute_name in member["attributes"]:
                 raw_attribute = member["attributes"][attribute_name]
 
                 # Pop one-item lists
@@ -343,14 +346,17 @@ class ADGroup:
         self.ldap_connection.search(search_base=self.ATTRIBUTES_SEARCH['base_dn'],
                                     search_filter=self.ATTRIBUTES_SEARCH['filter_string'],
                                     search_scope=self.ATTRIBUTES_SEARCH['scope'],
-                                    attributes=self.ATTRIBUTES_SEARCH['attributes'])
+                                    attributes=self.ATTRIBUTES_SEARCH['attribute_list'])
 
         results = [result["attributes"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
 
         if len(results) != 1:
             logger.debug("Search returned {count} results: {results}".format(count=len(results), results=results))
 
-        return results[0]
+        if results:
+            return results[0]
+        else:
+            return results
 
     def get_children(self):
         """ Returns a list of this group's children."""
