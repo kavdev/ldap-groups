@@ -9,3 +9,4 @@ v3.0.0, 10/3/14 -- Switched to python3-ldap
 v3.0.1, 10/8/14 -- bugfix
 v3.0.2, 10/8/14 -- bugfix
 v3.0.3, 10/13/14 -- bugfix
+v3.0.4, 10/20/14 -- bugfix, refactoring
