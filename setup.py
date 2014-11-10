@@ -7,7 +7,7 @@ def read(fname):
 
 setup(
     name='ldap-groups',
-    version='3.0.4-dev',
+    version='4.0.0',
     author='Alex Kavanaugh',
     author_email='kavanaugh.development@outlook.com',
     description="A python/django Active Directory group management abstraction that uses python3-ldap as a backend for cross-platform compatibility.",
@@ -17,7 +17,7 @@ setup(
     url='https://bitbucket.org/kavanaugh_development/ldap-groups/',
     packages=['ldap_groups'],
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Environment :: Web Environment",
         "Framework :: Django",
@@ -35,6 +35,6 @@ setup(
         "Topic :: Utilities",
     ],
     install_requires=[
-        "python3-ldap>=0.9.5.4",
+        "python3-ldap>=0.9.6",
     ],
 )

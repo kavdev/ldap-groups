@@ -19,9 +19,18 @@
 
 """
 
+class EntryDoesNotExist(Exception):
+    """The requested object does not exist."""
+    pass
 
-class AccountDoesNotExist(Exception):
+
+class AccountDoesNotExist(EntryDoesNotExist):
     """The requested user does not exist."""
+    pass
+
+
+class GroupDoesNotExist(EntryDoesNotExist):
+    """The requested group does not exist."""
     pass
 
 
@@ -50,7 +59,7 @@ class ModificationFailed(Exception):
     pass
 
 
-class AccountAlreadyExists(ModificationFailed):
+class EntryAlreadyExists(ModificationFailed):
     """The account name provided already exists in a group being modified."""
     pass
 
