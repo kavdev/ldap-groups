@@ -74,7 +74,8 @@ In its current state, ldap-groups can perform the following functions:
 An ADGroup instance only requires one argument to function: a group's distinguished name.
 Once the ADGroup is instantiated, the rest is fairly simple:
 
-.. code:number-lines: python
+.. code:: python
+    :number-lines:
 
     from ldap_groups import ADGroup
 
