@@ -75,7 +75,6 @@ An ADGroup instance only requires one argument to function: a group's distinguis
 Once the ADGroup is instantiated, the rest is fairly simple:
 
 .. code:: python
-    :number-lines:
 
     from ldap_groups import ADGroup
 
