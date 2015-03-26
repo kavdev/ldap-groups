@@ -28,6 +28,8 @@ from ldap3.core.exceptions import (LDAPException, LDAPExceptionError, LDAPInvali
 from .exceptions import (AccountDoesNotExist, GroupDoesNotExist, InvalidGroupDN, ImproperlyConfigured, InvalidCredentials,
                          LDAPServerUnreachable, ModificationFailed, EntryAlreadyExists, InsufficientPermissions)
 
+from .utils import escape_query
+
 logger = logging.getLogger(__name__)
 
 
@@ -126,14 +128,14 @@ class ADGroup:
         self.USER_SEARCH = {
             'base_dn': self.user_search_base_dn,
             'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
-            'filter_string': "(&(objectClass=user)({lookup_attribute}={{lookup_value}}))".format(lookup_attribute=self.user_lookup_attr),
+            'filter_string': "(&(objectClass=user)({lookup_attribute}={{lookup_value}}))".format(lookup_attribute=escape_query(self.user_lookup_attr)),
             'attribute_list': NO_ATTRIBUTES
         }
 
         self.GROUP_SEARCH = {
             'base_dn': self.group_search_base_dn,
             'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
-            'filter_string': "(&(objectClass=group)({lookup_attribute}={{lookup_value}}))".format(lookup_attribute=self.group_lookup_attr),
+            'filter_string': "(&(objectClass=group)({lookup_attribute}={{lookup_value}}))".format(lookup_attribute=escape_query(self.group_lookup_attr)),
             'attribute_list': NO_ATTRIBUTES
         }
 
@@ -147,7 +149,7 @@ class ADGroup:
         self.GROUP_CHILDREN_SEARCH = {
             'base_dn': self.base_dn,
             'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
-            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(memberOf={group_dn}))".format(group_dn=self.group_dn),
+            'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(memberOf={group_dn}))".format(group_dn=escape_query(self.group_dn)),
             'attribute_list': NO_ATTRIBUTES
         }
 
@@ -161,7 +163,7 @@ class ADGroup:
         self.GROUP_SINGLE_CHILD_SEARCH = {
             'base_dn': self.base_dn,
             'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
-            'filter_string': "(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name={{child_group_name}}))(memberOf={parent_dn}))".format(parent_dn=self.group_dn),
+            'filter_string': "(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name={{child_group_name}}))(memberOf={parent_dn}))".format(parent_dn=escape_query(self.group_dn)),
             'attribute_list': NO_ATTRIBUTES
         }
 
@@ -317,7 +319,7 @@ class ADGroup:
 
         """
         self.ldap_connection.search(search_base=self.USER_SEARCH['base_dn'],
-                                    search_filter=self.USER_SEARCH['filter_string'].format(lookup_value=user_lookup_attribute_value),
+                                    search_filter=self.USER_SEARCH['filter_string'].format(lookup_value=escape_query(user_lookup_attribute_value)),
                                     search_scope=self.USER_SEARCH['scope'],
                                     attributes=self.USER_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
@@ -343,7 +345,7 @@ class ADGroup:
 
         """
         self.ldap_connection.search(search_base=self.GROUP_SEARCH['base_dn'],
-                                    search_filter=self.GROUP_SEARCH['filter_string'].format(lookup_value=group_lookup_attribute_value),
+                                    search_filter=self.GROUP_SEARCH['filter_string'].format(lookup_value=escape_query(group_lookup_attribute_value)),
                                     search_scope=self.GROUP_SEARCH['scope'],
                                     attributes=self.GROUP_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
@@ -368,7 +370,7 @@ class ADGroup:
         """
 
         entry_list = self.ldap_connection.extend.standard.paged_search(search_base=self.GROUP_MEMBER_SEARCH['base_dn'],
-                                                                       search_filter=self.GROUP_MEMBER_SEARCH['filter_string'].format(group_dn=self.group_dn),
+                                                                       search_filter=self.GROUP_MEMBER_SEARCH['filter_string'].format(group_dn=escape_query(self.group_dn)),
                                                                        search_scope=self.GROUP_MEMBER_SEARCH['scope'],
                                                                        attributes=self.GROUP_MEMBER_SEARCH['attribute_list'],
                                                                        paged_size=page_size)
@@ -571,7 +573,7 @@ class ADGroup:
             return []
 
         entry_list = self.ldap_connection.extend.standard.paged_search(search_base=connection_dict['base_dn'],
-                                                                       search_filter=connection_dict['filter_string'].format(child_group_name=group_name),
+                                                                       search_filter=connection_dict['filter_string'].format(child_group_name=escape_query(group_name)),
                                                                        search_scope=connection_dict['scope'],
                                                                        attributes=connection_dict['attribute_list'],
                                                                        paged_size=page_size)
