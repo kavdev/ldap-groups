@@ -7,7 +7,7 @@ def read(fname):
 
 setup(
     name='ldap-groups',
-    version='4.1.1',
+    version='4.1.1.post1',
     author='Alex Kavanaugh',
     author_email='kavanaugh.development@outlook.com',
     description="A python/django Active Directory group management abstraction that uses python3-ldap as a backend for cross-platform compatibility.",
