@@ -23,4 +23,4 @@
 def escape_query(query):
     """Escapes certain filter characters from an LDAP query."""
 
-    return query.replace("\\", "\5C").replace("*", "\2A").replace("(", "\28").replace(")", "\29")
+    return query.replace("\\", r"\5C").replace("*", r"\2A").replace("(", r"\28").replace(")", r"\29")
