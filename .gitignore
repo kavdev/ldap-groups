@@ -10,6 +10,7 @@ __pycache__
 
 # Packaging files:
 *.egg*
+dist/*
 
 # Editor temp files:
 *.swp
