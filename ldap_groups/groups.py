@@ -19,6 +19,7 @@
 
 """
 
+from collections import deque
 import logging
 
 from ldap3 import Server, Connection, SEARCH_SCOPE_BASE_OBJECT, SEARCH_SCOPE_WHOLE_SUBTREE, MODIFY_DELETE, MODIFY_ADD, ALL_ATTRIBUTES, NO_ATTRIBUTES, SEARCH_SCOPE_SINGLE_LEVEL
@@ -403,6 +404,24 @@ class ADGroup:
             member_info.append(info_dict)
 
         return member_info
+
+    def get_tree_members(self):
+        """ Retrieves all members from this node of the tree down."""
+
+        members = []
+        queue = deque()
+        queue.appendleft(self)
+        visited = set()
+
+        while len(queue):
+            node = queue.popleft()
+
+            if node not in visited:
+                members.extend(node.get_member_info())
+                queue.extendleft(node.get_children())
+                visited.add(node)
+
+        return [{attribute: member[attribute] for attribute in self.attr_list} for member in members if member]
 
     ##############################################################################################################################################
     #                                                      Group Modification Methods                                                            #

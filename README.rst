@@ -1,12 +1,12 @@
 ldap-groups
 %%%%%%%%%%%
 
-A python/django Active Directory group management abstraction that uses python3-ldap as a backend for cross-platform compatibility.
+A python/django Active Directory group management abstraction that uses ldap3 as a backend for cross-platform compatibility.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:Version:           4.1.1
+:Version:           4.2.0
 :Dependencies:      Python 2.7+, 3.2+, ldap3>=0.9.8.8
-:Home page:         https://bitbucket.org/kavanaugh_development/ldap-groups
+:Home page:         https://github.com/kavdev/ldap_groups
 :Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
 :License:           GNU LGPL (http://www.gnu.org/licenses/lgpl.html)
 
@@ -155,6 +155,9 @@ Documentation
         :returns: A dictionary of information on members of the AD group based on the LDAP_GROUPS_ATTRIBUTE_LIST setting or attr_list argument.
 
         """
+    
+    def get_tree_members():
+        """ Retrieves all members from this node of the tree down."""
 
     def add_member(user_lookup_attribute_value):
         """ Attempts to add a member to the AD group.

@@ -7,14 +7,14 @@ def read(fname):
 
 setup(
     name='ldap-groups',
-    version='4.1.1.post1',
+    version='4.2.0.post1',
     author='Alex Kavanaugh',
     author_email='kavanaugh.development@outlook.com',
-    description="A python/django Active Directory group management abstraction that uses python3-ldap as a backend for cross-platform compatibility.",
+    description="A python/django Active Directory group management abstraction that uses ldap3 as a backend for cross-platform compatibility.",
     long_description=read('README.rst'),
     keywords="ldap active directory ldap-groups groups adgroups python django ad",
     license='GNU LGPL (http://www.gnu.org/licenses/lgpl.html)',
-    url='https://bitbucket.org/kavanaugh_development/ldap-groups/',
+    url='https://github.com/kavdev/ldap_groups',
     packages=['ldap_groups'],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -26,7 +26,6 @@ setup(
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
