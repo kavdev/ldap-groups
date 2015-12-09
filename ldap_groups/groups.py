@@ -421,7 +421,7 @@ class ADGroup:
                 queue.extendleft(node.get_children())
                 visited.add(node)
 
-        return [{attribute: member[attribute] for attribute in self.attr_list} for member in members if member]
+        return [{attribute: member.get(attribute) for attribute in self.attr_list} for member in members if member]
 
     ##############################################################################################################################################
     #                                                      Group Modification Methods                                                            #
