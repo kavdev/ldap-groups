@@ -15,3 +15,4 @@ v4.0.0, 2014-11-10 -- added abilily to configure search bases, search for user/g
 v4.1.0, 2015-03-25 -- all filter queries are now properly escaped in accordance with the LDAP spec (except the NUL character)
 v4.1.1, 2015-08-28 -- updated dependency, escape_query bugfixes
 v4.2.0, 2015-09-01 -- added get_tree_members method
+v4.2.1, 2015-12-23 -- A KeyError is no longer thrown when a member attribute can't be retrieved. None is returned instead. (Thanks @willson556)
