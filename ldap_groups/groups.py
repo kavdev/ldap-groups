@@ -363,8 +363,7 @@ class ADGroup:
         """
         self.ldap_connection.search(search_base=self.USER_SEARCH['base_dn'],
                                     search_filter=self.USER_SEARCH['filter_string'].format(
-                                        lookup_value=escape_query(user_lookup_attribute_value)
-                                    ),
+                                        lookup_value=escape_query(user_lookup_attribute_value)),
                                     search_scope=self.USER_SEARCH['scope'],
                                     attributes=self.USER_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
@@ -392,8 +391,7 @@ class ADGroup:
         """
         self.ldap_connection.search(search_base=self.GROUP_SEARCH['base_dn'],
                                     search_filter=self.GROUP_SEARCH['filter_string'].format(
-                                        lookup_value=escape_query(group_lookup_attribute_value)
-                                    ),
+                                        lookup_value=escape_query(group_lookup_attribute_value)),
                                     search_scope=self.GROUP_SEARCH['scope'],
                                     attributes=self.GROUP_SEARCH['attribute_list'])
         results = [result["dn"] for result in self.ldap_connection.response if result["type"] == "searchResEntry"]
