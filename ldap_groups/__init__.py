@@ -1,33 +1,16 @@
-"""
-
-LDAP Groups v4 - A python/django Active Directory group management abstraction
-    that uses python-ldap as a backend for cross-platform compatability.
-
-Dependencies:
-    python3-ldap>=0.9.6
-
-ldap-groups is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-ldap-groups is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Lesser Public License for more details.
-
-You should have received a copy of the GNU Lesser Public License
-along with ldap-groups. If not, see <http://www.gnu.org/licenses/>.
-
-.. moduleauthor:: Alex Kavanaugh <kavanaugh.development@outlook.com>
-
-"""
-
 from .groups import ADGroup
 
-#
-# Version Classification
-# Major Updates, Minor Updates, Revision/Bugfix Updates
-#
-VERSION = ("4", "2", "1")
-__version__ = ".".join(VERSION)
+
+__title__ = "python_ldap"
+__summary__ = ("A python/django Active Directory group management abstraction that uses ldap3 as a backend "
+               "for cross-platform compatibility.")
+__uri__ = "https://github.com/kavdev/ldap-groups/"
+
+__version__ = "4.2.2"
+
+__author__ = "Alexander Kavanaugh"
+__email__ = "alex@kavdev.io"
+
+__license__ = "MIT"
+__license__ = "License :: OSI Approved :: MIT License"
+__copyright__ = "Copyright (c) 2016 Alexander Kavanaugh"

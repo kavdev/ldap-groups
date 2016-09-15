@@ -1,22 +1,40 @@
+=============================
 ldap-groups
-%%%%%%%%%%%
-
+=============================
 A python/django Active Directory group management abstraction that uses ldap3 as a backend for cross-platform compatibility.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:Version:           4.2.1
-:Dependencies:      Python 2.7+, 3.3+, ldap3>=0.9.8.8
-:Home page:         https://github.com/kavdev/ldap_groups
-:Author:            Alex Kavanaugh <kavanaugh.development@outlook.com>
-:License:           GNU LGPL (http://www.gnu.org/licenses/lgpl.html)
+Badges
+------
 
+.. image:: https://img.shields.io/travis/kavdev/ldap-groups/master.svg?style=flat-square
+        :target: https://travis-ci.org/kavdev/ldap-groups
+.. image:: https://img.shields.io/codecov/c/github/kavdev/ldap-groups/master.svg?style=flat-square
+        :target: http://codecov.io/github/kavdev/ldap-groups?branch=master
+.. image:: https://img.shields.io/requires/github/kavdev/ldap-groups.svg?style=flat-square
+        :target: https://requires.io/github/kavdev/ldap-groups/requirements/?branch=master
+.. image:: https://img.shields.io/codacy/f8b8c71b805e4585b8c34ba7c02fbd0c.svg?style=flat-square
+        :target: https://www.codacy.com/app/kavanaugh-development/ldap-groups/dashboard
+
+.. image:: https://img.shields.io/pypi/v/ldap-groups.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/ldap-groups
+.. image:: https://img.shields.io/pypi/dw/ldap-groups.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/ldap-groups
+
+.. image:: https://img.shields.io/github/issues/kavdev/ldap-groups.svg?style=flat-square
+        :target: https://github.com/kavdev/ldap-groups/issues
+.. image:: https://img.shields.io/github/license/kavdev/ldap-groups.svg?style=flat-square
+        :target: https://github.com/kavdev/ldap-groups/blob/master/LICENSE
 
 Installation
-============
+-----
 
-Run ``pip install ldap-groups``
+Install ldap-groups with pip:
 
-Add *ldap-groups* to ``INSTALLED_APPS``
+.. code-block:: bash
+
+    pip install ldap-groups
+
+Add ldap-groups to ``INSTALLED_APPS`` (if you're using Django)
 
 .. code:: python
 
@@ -26,9 +44,8 @@ Add *ldap-groups* to ``INSTALLED_APPS``
         ...
     )
 
-
 Django Settings
-===============
+---------------
 
 There are a few settings that must be configured before ldap-groups will run.
 
@@ -50,9 +67,8 @@ NOTE: while a bind user is optional, many servers' security settings will deny a
 * ``LDAP_GROUPS_GROUP_SEARCH_BASE_DN`` - The base dn to use when looking up groups. Defaults to ``LDAP_GROUPS_BASE_DN``.
 * ``LDAP_GROUPS_ATTRIBUTE_LIST`` - A list of attributes returned for each member while pulling group members. An empty list should return all attributes. Defaults to ``['displayName', 'sAMAccountName', 'distinguishedName']``.
 
-
 Usage
-=====
+-----
 
 In its current state, ldap-groups can perform the following functions:
 
@@ -113,7 +129,7 @@ Once the ADGroup is instantiated, the rest is fairly simple:
             return self.ad_group_instance.get_attribute(TYPE_ATTRIBUTE)
 
 Documentation
-==================================
+-------------
 
 .. code:: python
 
@@ -247,9 +263,8 @@ Documentation
 
         """
 
-
 Running ldap-groups without Django
-==================================
+----------------------------------
 
 If ldap-groups is not used in a django project, the ADGroup object can be initialized with the following parameters:
 
@@ -269,3 +284,10 @@ If ldap-groups is not used in a django project, the ADGroup object can be initia
 * ``user_search_base_dn`` - The base dn to use when looking up users. Defaults to ``LDAP_GROUPS_BASE_DN``.
 * ``group_search_base_dn`` - The base dn to use when looking up groups. Defaults to ``LDAP_GROUPS_BASE_DN``.
 
+Running the Tests
+------------------
+
+.. code-block:: bash
+
+    pip install -r requirements/test.txt
+    ./runtests.py

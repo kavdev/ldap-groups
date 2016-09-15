@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = ldap_groups
+
+omit =
+    ldap_groups/*__init__.py
+
+[html]
+directory = cover
