@@ -1,4 +1,4 @@
-from .groups import ADGroup
+from .groups import ADGroup  # noqa: F401
 
 
 __title__ = "python_ldap"
