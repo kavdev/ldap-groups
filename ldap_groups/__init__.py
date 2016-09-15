@@ -6,7 +6,7 @@ __summary__ = ("A python/django Active Directory group management abstraction th
                "for cross-platform compatibility.")
 __uri__ = "https://github.com/kavdev/ldap-groups/"
 
-__version__ = "4.2.2"
+__version__ = "4.2.2.post0"
 
 __author__ = "Alexander Kavanaugh"
 __email__ = "alex@kavdev.io"
