@@ -13,7 +13,7 @@ Badges
 .. image:: https://img.shields.io/requires/github/kavdev/ldap-groups.svg?style=flat-square
         :target: https://requires.io/github/kavdev/ldap-groups/requirements/?branch=master
 .. image:: https://img.shields.io/codacy/f8b8c71b805e4585b8c34ba7c02fbd0c.svg?style=flat-square
-        :target: https://www.codacy.com/app/kavanaugh-development/ldap-groups/dashboard
+        :target: https://www.codacy.com/app/kavdev/ldap-groups/dashboard
 
 .. image:: https://img.shields.io/pypi/v/ldap-groups.svg?style=flat-square
         :target: https://pypi.python.org/pypi/ldap-groups
