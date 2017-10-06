@@ -9,8 +9,8 @@
 from collections import deque
 import logging
 
-from ldap3 import (Server, Connection, SEARCH_SCOPE_BASE_OBJECT, SEARCH_SCOPE_WHOLE_SUBTREE, MODIFY_DELETE,
-                   MODIFY_ADD, ALL_ATTRIBUTES, NO_ATTRIBUTES, SEARCH_SCOPE_SINGLE_LEVEL)
+from ldap3 import (Server, Connection, BASE, SUBTREE, MODIFY_DELETE,
+                   MODIFY_ADD, ALL_ATTRIBUTES, NO_ATTRIBUTES, LEVEL)
 from ldap3.core.exceptions import (LDAPException, LDAPExceptionError, LDAPInvalidServerError,
                                    LDAPInvalidCredentialsResult, LDAPOperationsErrorResult, LDAPInvalidDNSyntaxResult,
                                    LDAPNoSuchObjectResult, LDAPSizeLimitExceededResult, LDAPEntryAlreadyExistsResult,
@@ -136,14 +136,14 @@ class ADGroup:
         # Initialize search objects
         self.ATTRIBUTES_SEARCH = {
             'base_dn': self.group_dn,
-            'scope': SEARCH_SCOPE_BASE_OBJECT,
+            'scope': BASE,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
             'attribute_list': ALL_ATTRIBUTES
         }
 
         self.USER_SEARCH = {
             'base_dn': self.user_search_base_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': ("(&(objectClass=user)({lookup_attribute}"
                               "={{lookup_value}}))").format(lookup_attribute=escape_query(self.user_lookup_attr)),
             'attribute_list': NO_ATTRIBUTES
@@ -151,7 +151,7 @@ class ADGroup:
 
         self.GROUP_SEARCH = {
             'base_dn': self.group_search_base_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': ("(&(objectClass=group)({lookup_attribute}"
                               "={{lookup_value}}))").format(lookup_attribute=escape_query(self.group_lookup_attr)),
             'attribute_list': NO_ATTRIBUTES
@@ -159,14 +159,14 @@ class ADGroup:
 
         self.GROUP_MEMBER_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': "(&(objectCategory=user)(memberOf={group_dn}))",
             'attribute_list': self.attr_list
         }
 
         self.GROUP_CHILDREN_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': ("(&(|(objectClass=group)(objectClass=organizationalUnit))"
                               "(memberOf={group_dn}))").format(group_dn=escape_query(self.group_dn)),
             'attribute_list': NO_ATTRIBUTES
@@ -174,14 +174,14 @@ class ADGroup:
 
         self.OU_CHILDREN_SEARCH = {
             'base_dn': self.group_dn,
-            'scope': SEARCH_SCOPE_SINGLE_LEVEL,
+            'scope': LEVEL,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
             'attribute_list': NO_ATTRIBUTES
         }
 
         self.GROUP_SINGLE_CHILD_SEARCH = {
             'base_dn': self.base_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': ("(&(&(|(objectClass=group)(objectClass=organizationalUnit))(name={{child_group_name}}))"
                               "(memberOf={parent_dn}))").format(parent_dn=escape_query(self.group_dn)),
             'attribute_list': NO_ATTRIBUTES
@@ -189,21 +189,21 @@ class ADGroup:
 
         self.OU_SINGLE_CHILD_SEARCH = {
             'base_dn': self.group_dn,
-            'scope': SEARCH_SCOPE_SINGLE_LEVEL,
+            'scope': LEVEL,
             'filter_string': "(&(|(objectClass=group)(objectClass=organizationalUnit))(name={child_group_name}))",
             'attribute_list': NO_ATTRIBUTES
         }
 
         self.DESCENDANT_SEARCH = {
             'base_dn': self.group_dn,
-            'scope': SEARCH_SCOPE_WHOLE_SUBTREE,
+            'scope': SUBTREE,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
             'attribute_list': NO_ATTRIBUTES
         }
 
         self.VALID_GROUP_TEST = {
             'base_dn': self.group_dn,
-            'scope': SEARCH_SCOPE_BASE_OBJECT,
+            'scope': BASE,
             'filter_string': "(|(objectClass=group)(objectClass=organizationalUnit))",
             'attribute_list': NO_ATTRIBUTES
         }
